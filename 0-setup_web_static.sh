@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
-#a Bash script that sets up your web servers for the deployment of web_static
-import 
-import getpass
-from fabric import *
-from fabric import connection, config
+# script that sets up web servers for the deployment of web_static
+sudo apt-get update
+sudo apt-get -y install nginx
+sudo ufw allow 'Nginx HTTP'
 
-# password = getpass.getpass("Enter your password: ")
+sudo mkdir -p /data/
+sudo mkdir -p /data/web_static/
+sudo mkdir -p /data/web_static/releases/
+sudo mkdir -p /data/web_static/shared/
+sudo mkdir -p /data/web_static/releases/test/
+sudo touch /data/web_static/releases/test/index.html
+sudo echo "<html>
+  <head>
+  </head>
+  <body>
+    Holberton School
+  </body>
+</html>" | sudo tee /data/web_static/releases/test/index.html
 
-config = Config(overrides={'sudo': {'password' : putty}})
-conn = Connection("52.3.220.80", user="ubuntu", config=config)
+sudo ln -s -f /data/web_static/releases/test/ /data/web_static/current
 
-conn.run("sudo mkdir -p data")
-conn.run("cd data")
-conn.run("sudo mkdir -p web_static")
-conn.run("cd web_static")
-conn.run("sudo mkdir -p releases")
-conn.run("cd web_static")
-conn.run("sudo mkdir -p shared")
-conn.run("cd web_static")
-conn.run("cd releases")
-conn.run("sudo mkdir -p test")
-conn.run("cd test")
-conn.run("echo <h1>my enginx</h1> > index.html)
+sudo chown -R ubuntu:ubuntu /data/
 
+sudo sed -i '/listen 80 default_server/a location /hbnb_static { alias /data/web_static/current/;}' /etc/nginx/sites-enabled/default
 
-
+sudo service nginx restart
